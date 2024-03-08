@@ -3,7 +3,6 @@ package rbxbin
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"strconv"
 	"strings"
 )
@@ -37,13 +36,6 @@ func ParsePackages(manifest []byte) ([]Package, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		slog.Info("Parsed Package",
-			"name", m[i],
-			"checksum", m[i+1],
-			"size", s,
-			"zipsize", zs,
-		)
 
 		pkgs = append(pkgs, Package{
 			Name:     m[i],

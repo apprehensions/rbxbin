@@ -70,8 +70,6 @@ func (p *Package) Extract(src, dir string) error {
 			return fmt.Errorf("illegal package file path: %s", dest)
 		}
 
-		slog.Info("Extracting package file", "name", f.Name)
-
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(dest, f.Mode()); err != nil {
 				return err

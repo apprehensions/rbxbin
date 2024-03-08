@@ -42,6 +42,18 @@ func (m Mirror) URL(channel string) string {
 	return string(m) + "/channel/" + channel
 }
 
+// Package returns a URL to a package given a package name
+// and a Deployment, relative to the mirror.
+func (m Mirror) Package(d *Deployment, pkg string) string {
+	return m.URL(d.Channel) + "/" + d.GUID + "-" + pkg
+}
+
+// PackageManifest returns a URL of the package manifest of
+// the given Deployment.
+func (m Mirror) PackageManifest(d *Deployment) string {
+	return m.URL(d.Channel) + "/" + d.GUID + "-rbxPkgManifest.txt"
+}
+
 // Mirror returns an available Mirror from [Mirrors].
 func GetMirror() (Mirror, error) {
 	slog.Info("Finding an accessible deploy mirror")
