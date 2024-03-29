@@ -1,2 +1,6 @@
 github.com/apprehensions/rbxweb v0.0.0-20240308083857-a3d7205c6de9 h1:eOEtS+YksEplRdlZSKYSzDHfpDWA7UKFVlbdTHUxzFo=
 github.com/apprehensions/rbxweb v0.0.0-20240308083857-a3d7205c6de9/go.mod h1:F7WKRLrQxuRgfXxhwnlFJ059ZBMRxkXxvIhUxP4Qc5g=
+github.com/robloxapi/rbxdhist v0.6.0 h1:DH3hBwjgnJJyfuRQvJxkaX27V/EQP8/0KihW/9Ajo6Q=
+github.com/robloxapi/rbxdhist v0.6.0/go.mod h1:Dv8zmWSygz0Qc8SIRxasJ8wlAIchvyifEVHrG3qwNXI=
+github.com/robloxapi/rbxver v0.3.0 h1:ax3ndKtLiXNeYbGc56UEcPQYYMEr6heOfyRDfn+68lg=
+github.com/robloxapi/rbxver v0.3.0/go.mod h1:mpM7UdZ2YyLq4gSVtWToeRQLUHNBcOfRGRjINbOi5vM=

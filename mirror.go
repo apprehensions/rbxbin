@@ -2,13 +2,19 @@ package rbxbin
 
 import (
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
+
+	"github.com/robloxapi/rbxdhist"
 )
 
 // Mirror represents an available Roblox deployment mirror.
 type Mirror string
+
+// Job represents a deployment build.
+type Job rbxdhist.Job
 
 // PackageManifestSuffix can be added at the end of a mirror URL
 // to retrieve the package manifest URL path.
@@ -52,6 +58,34 @@ func (m Mirror) Package(d *Deployment, pkg string) string {
 // the given Deployment.
 func (m Mirror) PackageManifest(d *Deployment) string {
 	return m.URL(d.Channel) + "/" + d.GUID + "-rbxPkgManifest.txt"
+}
+
+// Jobs fetches the available deployment builds for the mirror.
+func (m Mirror) Jobs() ([]*Job, error) {
+	var jobs []*Job
+
+	hist, err := http.Get(m.URL("") + "/DeployHistory.txt")
+	if err != nil {
+		return jobs, err
+	}
+
+	body, err := io.ReadAll(hist.Body)
+	hist.Body.Close()
+	if err != nil {
+		return jobs, err
+	}
+
+	stream := rbxdhist.Lex(body)
+	for _, s := range stream {
+		j, ok := s.(*rbxdhist.Job)
+		if !ok || j == nil {
+			continue
+		}
+
+		jobs = append(jobs, (*Job)(j))
+	}
+
+	return jobs, nil
 }
 
 // Mirror returns an available Mirror from [Mirrors].
