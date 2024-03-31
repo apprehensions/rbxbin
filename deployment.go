@@ -1,10 +1,14 @@
 package rbxbin
 
 import (
+	"errors"
 	"log/slog"
 
+	"github.com/apprehensions/rbxweb"
 	"github.com/apprehensions/rbxweb/clientsettings"
 )
+
+var ErrBadChannel = errors.New("deployment channel is invalid or unauthorized")
 
 // Deployment is a representation of a Binary's deployment or version.
 //
@@ -23,18 +27,24 @@ type Deployment struct {
 
 // FetchDeployment returns the latest Version for the given roblox Binary type
 // with the given deployment channel through [clientsettings.GetClientVersion].
-func GetDeployment(bt clientsettings.BinaryType, channel string) (*Deployment, error) {
+func GetDeployment(bt clientsettings.BinaryType, channel string) (Deployment, error) {
 	slog.Info("Fetching Binary Deployment", "name", bt, "channel", channel)
 
 	cv, err := clientsettings.GetClientVersion(bt, channel)
 	if err != nil {
-		return nil, err
+		var apiError rbxweb.ErrorResponse
+		if errors.As(err, &apiError) {
+			if apiError.Code == 5 {
+				return Deployment{}, ErrBadChannel
+			}
+		}
+		return Deployment{}, err
 	}
 
 	slog.Info("Fetched Binary Deployment!",
 		"name", bt, "channel", channel, "guid", cv.GUID, "version", cv.Version)
 
-	return &Deployment{
+	return Deployment{
 		Type:    bt,
 		Channel: channel,
 		GUID:    cv.GUID,

@@ -3,6 +3,8 @@ package rbxbin
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -12,10 +14,35 @@ var (
 	ErrUnhandledPkgManifestVer = errors.New("unhandled package manifest version")
 )
 
-// ParsePackages returns a list of packages given a package manifest.
-func ParsePackages(manifest []byte) ([]Package, error) {
+// PackageManifest returns a list of packages for the named deployment.
+func (m Mirror) GetPackages(d Deployment) ([]Package, error) {
+	raw, err := http.Get(m.URL(d.Channel) + "/" + d.GUID + "-rbxPkgManifest.txt")
+	if err != nil {
+		return nil, err
+	}
+	defer raw.Body.Close()
+
+	if raw.StatusCode == http.StatusForbidden {
+		return nil, ErrBadChannel
+	}
+
+	body, err := io.ReadAll(raw.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	manif, err := ParsePackages(body)
+	if err != nil {
+		return nil, err
+	}
+
+	return manif, nil
+}
+
+// ParsePackages returns a list of packages parsed from the named package manifest.
+func ParsePackages(b []byte) ([]Package, error) {
 	var pkgs []Package
-	m := strings.Split(string(manifest), "\r\n")
+	m := strings.Split(string(b), "\r\n")
 
 	if (len(m)-2)%4 != 0 {
 		return nil, ErrInvalidPkgManifest

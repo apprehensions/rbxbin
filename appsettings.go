@@ -6,8 +6,7 @@ import (
 	"path/filepath"
 )
 
-// Required to run a Roblox Binary.
-const AppSettings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
+const appSettings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
 	"<Settings>\r\n" +
 	"        <ContentFolder>content</ContentFolder>\r\n" +
 	"        <BaseUrl>http://www.roblox.com</BaseUrl>\r\n" +
@@ -26,7 +25,7 @@ func WriteAppSettings(dir string) error {
 	}
 	defer f.Close()
 
-	if _, err := f.WriteString(AppSettings); err != nil {
+	if _, err := f.WriteString(appSettings); err != nil {
 		return err
 	}
 

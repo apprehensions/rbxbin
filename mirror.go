@@ -10,15 +10,15 @@ import (
 	"github.com/robloxapi/rbxdhist"
 )
 
-// Mirror represents an available Roblox deployment mirror.
+// Mirror represents a Roblox deployment mirror.
 type Mirror string
 
 // Job represents a deployment build.
 type Job rbxdhist.Job
 
-// PackageManifestSuffix can be added at the end of a mirror URL
-// to retrieve the package manifest URL path.
-const PackageManifestSuffix = "-rbxPkgManifest.txt"
+// DefaultMirror is the default deployment mirror that can be
+// used in situations where mirror fallbacks are undesired.
+const DefaultMirror Mirror = "https://setup.rbxcdn.com"
 
 var (
 	ErrNoMirrorFound = errors.New("no accessible deploy mirror found")
@@ -27,17 +27,16 @@ var (
 	//   setup-cfly.rbxcdn.com = roblox-setup.cachefly.net
 	//   setup.rbxcdn.com = setup-ns1.rbxcdn.com = setup-ak.rbxcdn.com
 	//   setup-hw.rbxcdn.com = setup-ll.rbxcdn.com = does not exist
-	KnownMirrors = []Mirror{
-		// Sorted by speed
-		Mirror("https://setup.rbxcdn.com"),
-		Mirror("https://setup-cfly.rbxcdn.com"),
+	Mirrors = []Mirror{
+		DefaultMirror,
+		Mirror("https://roblox-setup.cachefly.net"),
 		Mirror("https://s3.amazonaws.com/setup.roblox.com"),
 	}
 )
 
-// URL returns the mirror's URL with the given optional channel.
+// URL returns the mirror's URL with the given optional deployment channel.
 func (m Mirror) URL(channel string) string {
-	if channel == "" {
+	if channel == "" || channel == "LIVE" || channel == "live" {
 		return string(m)
 	}
 
@@ -50,32 +49,32 @@ func (m Mirror) URL(channel string) string {
 
 // Package returns a URL to a package given a package name
 // and a Deployment, relative to the mirror.
-func (m Mirror) Package(d *Deployment, pkg string) string {
+func (m Mirror) PackageURL(d Deployment, pkg string) string {
 	return m.URL(d.Channel) + "/" + d.GUID + "-" + pkg
 }
 
-// PackageManifest returns a URL of the package manifest of
-// the given Deployment.
-func (m Mirror) PackageManifest(d *Deployment) string {
-	return m.URL(d.Channel) + "/" + d.GUID + "-rbxPkgManifest.txt"
-}
-
-// Jobs fetches the available deployment builds for the mirror.
-func (m Mirror) Jobs() ([]*Job, error) {
-	var jobs []*Job
-
+// Jobs returns the available deployment builds for the mirror.
+func (m Mirror) GetJobs() ([]*Job, error) {
 	hist, err := http.Get(m.URL("") + "/DeployHistory.txt")
 	if err != nil {
-		return jobs, err
+		return nil, err
 	}
 
 	body, err := io.ReadAll(hist.Body)
 	hist.Body.Close()
 	if err != nil {
-		return jobs, err
+		return nil, err
 	}
 
-	stream := rbxdhist.Lex(body)
+	return ParseJobs(body), nil
+}
+
+// ParseJobs is a wrapper that returns a list of deployments, parsed
+// from the stream of bytes.
+//
+// See [rbxdhist.Lex] for more information.
+func ParseJobs(js []byte) (jobs []*Job) {
+	stream := rbxdhist.Lex(js)
 	for _, s := range stream {
 		j, ok := s.(*rbxdhist.Job)
 		if !ok || j == nil {
@@ -85,14 +84,16 @@ func (m Mirror) Jobs() ([]*Job, error) {
 		jobs = append(jobs, (*Job)(j))
 	}
 
-	return jobs, nil
+	return
 }
 
-// Mirror returns an available Mirror from [Mirrors].
+// Mirror returns an available deployment mirror from [Mirrors].
+//
+// Deployment mirrors may go down, or be blocked by ISPs.
 func GetMirror() (Mirror, error) {
 	slog.Info("Finding an accessible deploy mirror")
 
-	for _, m := range KnownMirrors {
+	for _, m := range Mirrors {
 		resp, err := http.Head(m.URL("") + "/" + "version")
 		if err != nil {
 			slog.Error("Bad deploy mirror", "mirror", m, "error", err)

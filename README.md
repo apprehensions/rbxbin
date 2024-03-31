@@ -9,3 +9,32 @@ Package [`log/slog`](https://pkg.go.dev/log/slog) is used by some routines for l
 
 Binaries WindowsStudio, MacPlayer and MacStudio do not have guranteed support, as this package
 is directed towards Windows support. Feel free to contribute.
+
+### Packages fetcher example
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/apprehensions/rbxbin"
+	cs "github.com/apprehensions/rbxweb/clientsettings"
+)
+
+func main() {
+	d, err := rbxbin.GetDeployment(cs.WindowsPlayer, "LIVE")
+	if err != nil {
+		log.Fatalln("failed to get deployment:", err)
+	}
+
+	ps, err := rbxbin.DefaultMirror.GetPackages(d)
+	if err != nil {
+		log.Fatalln("failed to get packages:", err)
+	}
+
+	for _, p := range ps {
+		log.Println("Package:", p.Name)
+	}
+}
+```
