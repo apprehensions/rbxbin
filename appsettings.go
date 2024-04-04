@@ -6,14 +6,15 @@ import (
 	"path/filepath"
 )
 
-const appSettings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
+// Contains necessary application settings required for Roblox to run.
+const AppSettings = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" +
 	"<Settings>\r\n" +
 	"        <ContentFolder>content</ContentFolder>\r\n" +
 	"        <BaseUrl>http://www.roblox.com</BaseUrl>\r\n" +
 	"</Settings>\r\n"
 
-// WriteAppSettings writes the AppSettings.xml file - required
-// to run Roblox - to a binary's deployment directory.
+// WriteAppSettings writes [AppSettings] to a AppSettings.xml file
+// in a binary's deployment directory.
 func WriteAppSettings(dir string) error {
 	as := filepath.Join(dir, "AppSettings.xml")
 
@@ -25,7 +26,7 @@ func WriteAppSettings(dir string) error {
 	}
 	defer f.Close()
 
-	if _, err := f.WriteString(appSettings); err != nil {
+	if _, err := f.WriteString(AppSettings); err != nil {
 		return err
 	}
 
