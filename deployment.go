@@ -8,6 +8,8 @@ import (
 	"github.com/apprehensions/rbxweb/clientsettings"
 )
 
+// ErrBadChannel indicates if the mentioned deployment channel does not exist
+// or out of permission scope for the current authenticated user.
 var ErrBadChannel = errors.New("deployment channel is invalid or unauthorized")
 
 // Deployment is a representation of a Binary's deployment or version.
@@ -25,8 +27,8 @@ type Deployment struct {
 	GUID    string
 }
 
-// FetchDeployment returns the latest Version for the given roblox Binary type
-// with the given deployment channel through [clientsettings.GetClientVersion].
+// FetchDeployment returns the latest deployment information for the given
+// Roblox binary type with the given deployment channel.
 func GetDeployment(bt clientsettings.BinaryType, channel string) (Deployment, error) {
 	slog.Info("Fetching Binary Deployment", "name", bt, "channel", channel)
 
