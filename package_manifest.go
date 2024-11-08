@@ -10,20 +10,21 @@ import (
 )
 
 var (
+	ErrMissingPkgManifest      = errors.New("package manifest fetch failed")
 	ErrInvalidPkgManifest      = errors.New("package manifest is invalid")
 	ErrUnhandledPkgManifestVer = errors.New("unhandled package manifest version")
 )
 
 // PackageManifest returns a list of packages for the named deployment.
 func (m Mirror) GetPackages(d Deployment) ([]Package, error) {
-	raw, err := http.Get(m.URL(d.Channel) + "/" + d.GUID + "-rbxPkgManifest.txt")
+	raw, err := http.Get(m.PackageURL(d, "rbxPkgManifest.txt"))
 	if err != nil {
 		return nil, err
 	}
 	defer raw.Body.Close()
 
-	if raw.StatusCode == http.StatusForbidden {
-		return nil, ErrBadChannel
+	if raw.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("%s: %s", ErrMissingPkgManifest, raw.Status)
 	}
 
 	body, err := io.ReadAll(raw.Body)
