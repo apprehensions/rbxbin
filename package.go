@@ -37,7 +37,7 @@ func (p *Package) Verify(src string) error {
 	fsum := hex.EncodeToString(h.Sum(nil))
 
 	if p.Checksum != fsum {
-		return fmt.Errorf("package %s is corrupted, please re-download or delete package", p.Name)
+		return fmt.Errorf("package file %s is corrupted, please re-download or delete package", src)
 	}
 
 	return nil
