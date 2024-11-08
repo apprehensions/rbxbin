@@ -10,17 +10,20 @@ func TestDirsCurrent(t *testing.T) {
 	for _, b := range []cs.BinaryType{cs.WindowsPlayer, cs.WindowsStudio64} {
 		d, err := GetDeployment(b, "")
 		if err != nil {
-			t.Skipf("%s: Deployment fetch failed: %s", b, err)
+			t.Fatalf("%s: %s", b, err)
 		}
 
 		ps, err := DefaultMirror.GetPackages(d)
 		if err != nil {
-			t.Skipf("%s: Packages fetch failed: %s", b, err)
+			t.Fatalf("%s: pkgs: %s", b, err)
 		}
 
-		dirs := BinaryDirectories(b)
+		dirs, err := DefaultMirror.BinaryDirectories(d)
+		if err != nil {
+			t.Fatalf("%s: dirs: %s", b, err)
+		}
 
-		for zip, _ := range dirs {
+		for zip := range dirs {
 			found := false
 			for _, p := range ps {
 				if p.Name == zip {
