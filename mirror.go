@@ -47,12 +47,6 @@ func (m Mirror) URL(channel string) string {
 	return string(m) + "/channel/" + channel
 }
 
-// Package returns a URL to a package given a package name
-// and a Deployment, relative to the mirror.
-func (m Mirror) PackageURL(d Deployment, pkg string) string {
-	return m.URL(d.Channel) + "/" + d.GUID + "-" + pkg
-}
-
 // Jobs returns the available deployment builds for the mirror.
 func (m Mirror) GetJobs() ([]*Job, error) {
 	hist, err := http.Get(m.URL("") + "/DeployHistory.txt")
