@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,8 +27,6 @@ func (m Mirror) PackageURL(d Deployment, pkg string) string {
 
 // Verify checks the named package source file against it's checksum.
 func (p *Package) Verify(src string) error {
-	slog.Info("Verifying Package", "name", p.Name, "path", src)
-
 	f, err := os.Open(src)
 	if err != nil {
 		return err
@@ -88,8 +85,6 @@ func (p *Package) Extract(src, dir string) error {
 			return err
 		}
 	}
-
-	slog.Info("Extracted package", "name", p.Name, "path", src, "dir", dir)
 
 	return nil
 }

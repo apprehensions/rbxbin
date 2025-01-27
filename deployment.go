@@ -2,7 +2,6 @@ package rbxbin
 
 import (
 	"errors"
-	"log/slog"
 
 	"github.com/apprehensions/rbxweb"
 	"github.com/apprehensions/rbxweb/clientsettings"
@@ -30,8 +29,6 @@ type Deployment struct {
 // FetchDeployment returns the latest deployment information for the given
 // Roblox binary type with the given deployment channel.
 func GetDeployment(bt clientsettings.BinaryType, channel string) (Deployment, error) {
-	slog.Info("Fetching Binary Deployment", "name", bt, "channel", channel)
-
 	cv, err := clientsettings.GetClientVersion(bt, channel)
 	if err != nil {
 		var apiError rbxweb.ErrorResponse
@@ -42,9 +39,6 @@ func GetDeployment(bt clientsettings.BinaryType, channel string) (Deployment, er
 		}
 		return Deployment{}, err
 	}
-
-	slog.Info("Fetched Binary Deployment!",
-		"name", bt, "channel", channel, "guid", cv.GUID, "version", cv.Version)
 
 	return Deployment{
 		Type:    bt,

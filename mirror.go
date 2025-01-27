@@ -3,7 +3,6 @@ package rbxbin
 import (
 	"errors"
 	"io"
-	"log/slog"
 	"net/http"
 	"strings"
 
@@ -85,20 +84,14 @@ func ParseJobs(js []byte) (jobs []*Job) {
 //
 // Deployment mirrors may go down, or be blocked by ISPs.
 func GetMirror() (Mirror, error) {
-	slog.Info("Finding an accessible deploy mirror")
-
 	for _, m := range Mirrors {
 		resp, err := http.Head(m.URL("") + "/" + "version")
 		if err != nil {
-			slog.Error("Bad deploy mirror", "mirror", m, "error", err)
-
 			continue
 		}
 		resp.Body.Close()
 
 		if resp.StatusCode == http.StatusOK {
-			slog.Info("Found deploy mirror", "mirror", m)
-
 			return m, nil
 		}
 	}
